@@ -1,1 +1,3 @@
 fjghfjghfjgh
+
+![котик](cat.gif)
