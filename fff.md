@@ -24,3 +24,4 @@ git pull
 sdfdsggdfdfrssfgs
 
 ![1](i.webp)
+![image](https://github.com/user-attachments/assets/9b2f1d0a-250f-4b9c-a74a-d1bed092ef9e)
