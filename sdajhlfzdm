@@ -1,0 +1,18 @@
+Private Sub Sinus_Click()
+
+    Dim i As Integer
+    For i = 0 To 100
+        Dim newX As Single
+        newX = i * (Me.Width - Rect.Width) / 100
+        Dim newY As Single
+        newY = Me.Height / 2 + 50 * Sin(i * 0.15)
+        Rect.Move newX, newY
+        DoEvents
+        Dim wait As Double
+        wait = Timer + 0.05
+        Do While Timer < wait
+            DoEvents
+        Loop
+    Next i
+
+End Sub
