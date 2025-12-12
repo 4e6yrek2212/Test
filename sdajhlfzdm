@@ -16,3 +16,76 @@ Private Sub Sinus_Click()
     Next i
 
 End Sub
+
+
+
+
+Private Sub UserForm_Initialize()
+    Size.AddItem "30"
+    Size.AddItem "36"
+    Size.AddItem "42"
+    Size.AddItem "46"
+    Color.AddItem "×åðíûé"
+    Color.AddItem "Êðàñíûé"
+    Color.AddItem "Ñèíèé"
+End Sub
+
+Private Sub Color_Change()
+    Select Case Color.Text
+    Case Is = "×åðíûé"
+            Rect.BackColor = &H0&
+    Case Is = "Êðàñíûé"
+            Rect.BackColor = &HC0&
+    Case Is = "Ñèíèé"
+            Rect.BackColor = &HC00000
+    End Select
+End Sub
+
+Private Sub Rect_Click()
+    
+End Sub
+
+Private Sub Gorizont_Click()
+    Rect.Move Rect.Left - -100
+End Sub
+
+Private Sub random_Click()
+    Dim RectX
+    Dim RectY
+    Randomize
+    RectX = ((50 * Rnd) + 10)
+    RectY = ((50 * Rnd) + 10)
+    Rect.Move Rect.Left - -RectX, Rect.Top - RectY
+End Sub
+
+Private Sub Sinus_Click()
+
+    Dim i As Integer
+    For i = 0 To 100
+        Dim newX As Single
+        newX = i * (Me.Width - Rect.Width) / 100
+        Dim newY As Single
+        newY = Me.Height / 2 + 50 * sin(i * 0.15)
+        Rect.Move newX, newY
+        DoEvents
+        Dim wait As Double
+        wait = Timer + 0.05
+        Do While Timer < wait
+            DoEvents
+        Loop
+    Next i
+
+End Sub
+
+Private Sub Size_Change()
+    Rect.Width = Size.Text
+    Rect.Height = Size.Text
+End Sub
+
+Private Sub vertical_Click()
+    Rect.Move Rect.Left, Rect.Top - 100
+End Sub
+
+Private Sub Vexit_Click()
+    Me.Hide
+End Sub
