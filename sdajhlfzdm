@@ -89,3 +89,23 @@ End Sub
 Private Sub Vexit_Click()
     Me.Hide
 End Sub
+
+
+
+Option Explicit
+
+Private Sub CommandButton1_Click()
+    MsgBox (ListBox1)
+End Sub
+
+Private Sub ListBox1_Click()
+
+End Sub
+
+Private Sub UserForm_Initialize()
+    Dim i
+    For i = 32 To 255
+        ListBox1.AddItem "Êîä ñèìâîëà " & i & " = " & Chr(i)
+    Next i
+    
+End Sub
