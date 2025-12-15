@@ -109,3 +109,302 @@ Private Sub UserForm_Initialize()
     Next i
     
 End Sub
+
+
+' Задание 3: Ввод данных об альбомах исполнителя
+Sub Task3_InputAlbums()
+    Dim ws As Worksheet
+    Dim artistName As String
+    Dim albumCount As Integer
+    Dim i As Integer
+    Dim startRow As Integer
+    
+    ' Создаем или очищаем лист
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets("Лист1")
+    On Error GoTo 0
+    
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add
+        ws.Name = "Лист1"
+    End If
+    
+    ' Очищаем лист
+    ws.Cells.Clear
+    ws.Cells.ClearFormats
+    
+    ' Ввод имени исполнителя
+    artistName = InputBox("Введите имя исполнителя:", "Ввод данных", "Кирюров Ф.Б.")
+    If artistName = "" Then Exit Sub
+    
+    ' Ввод количества альбомов
+    albumCount = Val(InputBox("Сколько альбомов ввести?", "Количество альбомов", "4"))
+    If albumCount <= 0 Then Exit Sub
+    
+    ' Заголовок таблицы
+    ws.Cells(1, 1).Value = artistName
+    ws.Cells(1, 1).Font.Bold = True
+    ws.Cells(1, 1).Font.Size = 14
+    
+    ws.Cells(2, 1).Value = "Выпустил альбомы:"
+    ws.Cells(2, 1).Font.Italic = True
+    
+    ' Заголовки столбцов
+    ws.Cells(3, 1).Value = "Название альбома"
+    ws.Cells(3, 2).Value = "Дата выпуска"
+    ws.Cells(3, 3).Value = "Продано копий"
+    
+    ' Форматирование заголовков
+    With ws.Range("A3:C3")
+        .Font.Bold = True
+        .Interior.Color = RGB(200, 200, 200)
+        .HorizontalAlignment = xlCenter
+        .Borders.LineStyle = xlContinuous
+    End With
+    
+    startRow = 4
+    
+    ' Ввод данных по альбомам
+    For i = 1 To albumCount
+        Dim albumName As String
+        Dim releaseDate As String
+        Dim copiesSold As String
+        
+        albumName = InputBox("Введите название альбома " & i & ":", _
+                            "Альбом " & i, Choose(i, "Дуэты", "For You", "Друбо?", "Я"))
+        
+        releaseDate = InputBox("Введите дату выпуска (дд.мм.гггг):", _
+                              "Дата выпуска " & i, Choose(i, "12.12.2004", "01.03.2007", "10.05.2011", "11.09.2016"))
+        
+        copiesSold = InputBox("Введите количество проданных копий:", _
+                             "Продажи " & i, Choose(i, "12000", "34444", "50000", "10000"))
+        
+        ' Записываем данные на лист
+        ws.Cells(startRow + i - 1, 1).Value = "«" & albumName & "»"
+        ws.Cells(startRow + i - 1, 2).Value = CDate(releaseDate)
+        ws.Cells(startRow + i - 1, 3).Value = Val(copiesSold)
+        
+        ' Форматируем ячейки
+        With ws.Cells(startRow + i - 1, 2)
+            .NumberFormat = "dd.mm.yyyy"
+            .HorizontalAlignment = xlCenter
+        End With
+        
+        With ws.Cells(startRow + i - 1, 3)
+            .NumberFormat = "#,##0"
+            .HorizontalAlignment = xlRight
+        End With
+    Next i
+    
+    ' Добавляем рамки
+    Dim lastRow As Long
+    lastRow = startRow + albumCount - 1
+    With ws.Range("A3:C" & lastRow)
+        .Borders.LineStyle = xlContinuous
+        .Borders.Weight = xlThin
+    End With
+    
+    ' Автоподбор ширины столбцов
+    ws.Columns("A:C").AutoFit
+    
+    ' Добавляем итоги
+    ws.Cells(lastRow + 2, 1).Value = "Всего альбомов:"
+    ws.Cells(lastRow + 2, 2).Value = albumCount
+    ws.Cells(lastRow + 2, 2).Font.Bold = True
+    
+    Dim totalCopies As Long
+    totalCopies = Application.WorksheetFunction.Sum(ws.Range("C4:C" & lastRow))
+    ws.Cells(lastRow + 3, 1).Value = "Всего продано:"
+    ws.Cells(lastRow + 3, 2).Value = totalCopies
+    ws.Cells(lastRow + 3, 2).NumberFormat = "#,##0"
+    ws.Cells(lastRow + 3, 2).Font.Bold = True
+    
+    MsgBox "Данные об альбомах успешно записаны!", vbInformation, "Задание 3"
+End Sub
+
+' Форма для ввода данных об альбомах
+Sub Task3_ShowInputForm()
+    UserForm_Albums.Show
+End Sub
+
+' UserForm_Albums (добавьте элементы управления):
+' - TextBox: txtArtist (для имени исполнителя)
+' - ListBox: lstAlbums (для отображения альбомов)
+' - TextBox: txtAlbumName
+' - TextBox: txtReleaseDate
+' - TextBox: txtCopiesSold
+' - CommandButton: btnAddAlbum
+' - CommandButton: btnSaveToSheet
+' - CommandButton: btnClear
+
+' Код для UserForm_Albums
+Option Explicit
+
+Private Type AlbumInfo
+    Name As String
+    ReleaseDate As Date
+    CopiesSold As Long
+End Type
+
+Private albums() As AlbumInfo
+Private albumCount As Integer
+
+Private Sub UserForm_Initialize()
+    ' Инициализация формы
+    txtArtist.Value = "Кирюров Ф.Б."
+    
+    ' Настройка ListBox
+    lstAlbums.ColumnCount = 3
+    lstAlbums.ColumnWidths = "150;80;80"
+    
+    ' Инициализация массива
+    ReDim albums(1 To 10)
+    albumCount = 0
+    
+    ' Добавляем примеры данных
+    AddExampleData
+End Sub
+
+Private Sub AddExampleData()
+    ' Добавление примеров данных
+    AddAlbum "Дуэты", "12.12.2004", 12000
+    AddAlbum "For You", "01.03.2007", 34444
+    AddAlbum "Друбо?", "10.05.2011", 50000
+    AddAlbum "Я", "11.09.2016", 10000
+End Sub
+
+Private Sub AddAlbum(albumName As String, releaseDate As String, copies As Long)
+    albumCount = albumCount + 1
+    If albumCount > UBound(albums) Then
+        ReDim Preserve albums(1 To UBound(albums) + 10)
+    End If
+    
+    With albums(albumCount)
+        .Name = albumName
+        .ReleaseDate = CDate(releaseDate)
+        .CopiesSold = copies
+    End With
+    
+    ' Добавляем в ListBox
+    lstAlbums.AddItem
+    lstAlbums.List(albumCount - 1, 0) = "«" & albumName & "»"
+    lstAlbums.List(albumCount - 1, 1) = Format(CDate(releaseDate), "dd.mm.yyyy")
+    lstAlbums.List(albumCount - 1, 2) = Format(copies, "#,##0")
+End Sub
+
+Private Sub btnAddAlbum_Click()
+    ' Проверка введенных данных
+    If Trim(txtAlbumName.Value) = "" Then
+        MsgBox "Введите название альбома!", vbExclamation
+        txtAlbumName.SetFocus
+        Exit Sub
+    End If
+    
+    If Not IsDate(txtReleaseDate.Value) Then
+        MsgBox "Введите корректную дату!", vbExclamation
+        txtReleaseDate.SetFocus
+        Exit Sub
+    End If
+    
+    If Not IsNumeric(txtCopiesSold.Value) Then
+        MsgBox "Введите число для проданных копий!", vbExclamation
+        txtCopiesSold.SetFocus
+        Exit Sub
+    End If
+    
+    ' Добавление альбома
+    AddAlbum txtAlbumName.Value, txtReleaseDate.Value, CLng(txtCopiesSold.Value)
+    
+    ' Очистка полей ввода
+    txtAlbumName.Value = ""
+    txtReleaseDate.Value = ""
+    txtCopiesSold.Value = ""
+    txtAlbumName.SetFocus
+End Sub
+
+Private Sub btnSaveToSheet_Click()
+    Dim ws As Worksheet
+    Dim i As Integer
+    Dim startRow As Integer
+    
+    ' Создаем или получаем лист
+    On Error Resume Next
+    Set ws = ThisWorkbook.Worksheets("Лист1")
+    On Error GoTo 0
+    
+    If ws Is Nothing Then
+        Set ws = ThisWorkbook.Worksheets.Add
+        ws.Name = "Лист1"
+    End If
+    
+    ' Очищаем лист
+    ws.Cells.Clear
+    
+    ' Записываем данные исполнителя
+    ws.Cells(1, 1).Value = txtArtist.Value
+    ws.Cells(1, 1).Font.Bold = True
+    ws.Cells(1, 1).Font.Size = 14
+    
+    ws.Cells(2, 1).Value = "Выпустил альбомы:"
+    
+    ' Заголовки таблицы
+    ws.Cells(3, 1).Value = "Название альбома"
+    ws.Cells(3, 2).Value = "Дата выпуска"
+    ws.Cells(3, 3).Value = "Продано копий"
+    
+    With ws.Range("A3:C3")
+        .Font.Bold = True
+        .Interior.Color = RGB(200, 200, 200)
+        .HorizontalAlignment = xlCenter
+        .Borders.LineStyle = xlContinuous
+    End With
+    
+    startRow = 4
+    
+    ' Записываем данные альбомов
+    For i = 1 To albumCount
+        ws.Cells(startRow + i - 1, 1).Value = "«" & albums(i).Name & "»"
+        ws.Cells(startRow + i - 1, 2).Value = albums(i).ReleaseDate
+        ws.Cells(startRow + i - 1, 3).Value = albums(i).CopiesSold
+        
+        ' Форматирование
+        With ws.Cells(startRow + i - 1, 2)
+            .NumberFormat = "dd.mm.yyyy"
+            .HorizontalAlignment = xlCenter
+        End With
+        
+        With ws.Cells(startRow + i - 1, 3)
+            .NumberFormat = "#,##0"
+            .HorizontalAlignment = xlRight
+        End With
+    Next i
+    
+    ' Рамки и автоширина
+    With ws.Range("A3:C" & (startRow + albumCount - 1))
+        .Borders.LineStyle = xlContinuous
+    End With
+    
+    ws.Columns("A:C").AutoFit
+    
+    ' Итоги
+    Dim totalCopies As Long
+    For i = 1 To albumCount
+        totalCopies = totalCopies + albums(i).CopiesSold
+    Next i
+    
+    ws.Cells(startRow + albumCount + 1, 1).Value = "Всего альбомов:"
+    ws.Cells(startRow + albumCount + 1, 2).Value = albumCount
+    
+    ws.Cells(startRow + albumCount + 2, 1).Value = "Всего продано:"
+    ws.Cells(startRow + albumCount + 2, 2).Value = totalCopies
+    ws.Cells(startRow + albumCount + 2, 2).NumberFormat = "#,##0"
+    
+    MsgBox "Данные сохранены на Лист1!", vbInformation
+End Sub
+
+Private Sub btnClear_Click()
+    ' Очистка списка
+    lstAlbums.Clear
+    albumCount = 0
+    ReDim albums(1 To 10)
+End Sub
